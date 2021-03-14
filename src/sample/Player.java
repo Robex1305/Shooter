@@ -11,6 +11,13 @@ import java.awt.*;
 public class Player extends Sprite{
     private MouseEvent click;
 
+    private boolean isMovingUp;
+    private boolean isMovingDown;
+    private boolean isMovingLeft;
+    private boolean isMovingRight;
+
+    private boolean damageOnCooldown;
+
     public Player(Pane pane, double x, double y, double width, double height, String name, double speed) {
         super(pane, x, y, width, height, name, speed);
         Scene scene = this.getPane().getScene();
@@ -20,16 +27,16 @@ public class Player extends Sprite{
             public void handle(KeyEvent event) {
                 switch (event.getCode()){
                     case Z:
-                        setMovingYcoefficient(-1);
+                        isMovingUp = true;
                         break;
                     case S:
-                        setMovingYcoefficient(1);
+                        isMovingDown = true;
                         break;
                     case Q:
-                        setMovingXcoefficient(-1);
+                        isMovingLeft = true;
                         break;
                     case D:
-                        setMovingXcoefficient(+1);
+                        isMovingRight = true;
                         break;
                 }
             }
@@ -39,22 +46,24 @@ public class Player extends Sprite{
 
             @Override
             public void handle(KeyEvent event) {
-                switch (event.getCode()){
+                switch (event.getCode()) {
                     case Z:
-                        setMovingYcoefficient(0);
+                        isMovingUp = false;
                         break;
                     case S:
-                        setMovingYcoefficient(0);
+                        isMovingDown = false;
                         break;
                     case Q:
-                        setMovingXcoefficient(0);
+                        isMovingLeft = false;
                         break;
                     case D:
-                        setMovingXcoefficient(0);
+                        isMovingRight = false;
                         break;
                 }
             }
         });
+
+
 
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
@@ -62,16 +71,66 @@ public class Player extends Sprite{
                 click = event;
                 switch (event.getButton()){
                     case PRIMARY:
-                        shoot();
+                        Point p = new Point();
+                        p.setLocation(click.getX(), click.getY());
+                        shoot(p);
                         break;
                 }
             }
         });
+
+        damageOnCooldown = false;
     }
 
-    public void shoot(){
-        Point point = new Point();
-        point.setLocation(click.getX(), click.getY());
-        Bullet bullet = new Bullet(this.getPane(), this.getTranslateX() + (getWidth()/2), this.getTranslateY() + (getHeight()/2), 5,5, "bullet", 6, point);
+
+    public void setDamageOnCooldown(boolean damageOnCooldown) {
+        this.damageOnCooldown = damageOnCooldown;
+    }
+
+    public boolean isDamageOnCooldown() {
+        return damageOnCooldown;
+    }
+
+    public void takeDamage(int damages){
+        if(!damageOnCooldown) {
+            this.setLife(getLife() - damages);
+        }
+    }
+
+    @Override
+    public void move() {
+        if(isMovingRight ^ isMovingLeft){
+            if(isMovingLeft) setMovingXcoefficient(-1);
+            if(isMovingRight) setMovingXcoefficient(1);
+        }
+        else{
+            setMovingXcoefficient(0);
+        }
+
+        if(isMovingUp ^ isMovingDown){
+            if(isMovingUp) setMovingYcoefficient(-1);
+            if(isMovingDown) setMovingYcoefficient(1);
+        }
+        else{
+            setMovingYcoefficient(0);
+        }
+
+        if(this.getTranslateX() <= 10){
+            this.setMovingXcoefficient(1);
+        }
+        else if(this.getTranslateX() >= getPane().getPrefWidth() - 10 - getWidth())
+        {
+            this.setMovingXcoefficient(-1);
+        }
+
+        if(this.getTranslateY() <= 60){
+            this.setMovingYcoefficient(1);
+        }
+        else if(this.getTranslateY() >= getPane().getPrefHeight() - 10)
+        {
+            this.setMovingYcoefficient(-1);
+        }
+
+        super.move();
     }
 }

@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.awt.*;
@@ -15,19 +16,48 @@ public class Sprite extends Rectangle {
     private double movingXcoefficient;
     private double movingYcoefficient;
 
+    private int life;
+
     private double speed;
 
     public Sprite(Pane pane, double x, double y, double width, double height, String name, double speed) {
         super(width, height);
-        setTranslateX(x);
-        setTranslateY(y);
         this.pane = pane;
-        this.pane.getChildren().add(this);
+
+        Point p = new Point();
+        if(x == 0 && y == 0){
+            p.setLocation(randomCoordinates(x,y));
+        }
+        else{
+            p.setLocation(x,y);
+        }
+        setTranslateX(p.getX());
+        setTranslateY(p.getY());
+
         this.speed = speed;
         this.movingXcoefficient = 0;
         this.movingYcoefficient = 0;
+        this.setLife(10);
+        this.pane.getChildren().add(this);
     }
 
+
+
+    public boolean isAlive(){
+        return getLife() > 0;
+    }
+
+    public int getLife() {
+        return life;
+    }
+
+    public void setLife(int life) {
+        this.life = life;
+        if(life < 0){
+            life = 0;
+        }
+        setFill(Color.rgb(25*(10-life),25*life,0));
+    }
 
     public double getMovingXcoefficient() {
         return movingXcoefficient;
@@ -50,16 +80,44 @@ public class Sprite extends Rectangle {
     }
 
     public void move(){
-        this.setTranslateX(getTranslateX() + getMovingXcoefficient()*speed);
-        this.setTranslateY(getTranslateY() + getMovingYcoefficient()*speed);
+        if(isAlive()) {
+            this.setTranslateX(getTranslateX() + getMovingXcoefficient() * speed);
+            this.setTranslateY(getTranslateY() + getMovingYcoefficient() * speed);
+        }
     }
 
+    private Point randomCoordinates(double x, double y) {
+        double rand = Math.random();
 
-    public void shoot(Sprite target){
-        Point point = new Point();
-        point.setLocation(target.getX(), target.getY());
-        Bullet bullet = new Bullet(this.pane, this.getTranslateX() + (getWidth()/2), this.getTranslateY() + (getHeight()/2), 5,5, "bullet", 10, point);
+        //Spawn top
+        if(rand < 0.25){
+            x = Math.random() * pane.getPrefWidth();
+            y = - 20 - getHeight();
+        }
+        //Spawn bot
+        if(rand >= 0.25 && rand < 0.5){
+            x = Math.random() * pane.getPrefWidth();
+            y = pane.getPrefHeight() + 20 + getHeight();
+        }
+        //Spawn left
+        if(rand >= 50 && rand < 0.75){
+            x =  -20 - getWidth();
+            y = Math.random() * pane.getPrefHeight();
+        }
+        //Spawn right
+        if(rand >= 0.75){
+            x = pane.getPrefWidth() + 20 + getWidth();
+            y = Math.random() * pane.getPrefHeight();
+        }
+        Point p = new Point();
+        p.setLocation(x,y);
+        return p;
+    }
 
+    public void shoot(Point p){
+        if(isAlive()) {
+            new Bullet(this.pane, this.getTranslateX() + (getWidth() / 2), this.getTranslateY() + (getHeight() / 2), 5, 5, "bullet", 6, this, p);
+        }
     }
 
     public boolean colide(Sprite sprite){
