@@ -7,10 +7,9 @@ import java.awt.*;
 
 public class Enemy extends Sprite{
     private Sprite target;
-    public Enemy(Pane pane, double x, double y, double width, double height, String name, double speed, Sprite target) {
-        super(pane, x, y, width, height, name, speed);
+    public Enemy(Pane pane, double width, double height, double speed, Sprite target) {
+        super(pane, -1, -1, width, height, speed);
         this.target = target;
-
     }
 
 
@@ -18,7 +17,7 @@ public class Enemy extends Sprite{
     @Override
     public void setLife(int life) {
         super.setLife(life);
-        setFill(Color.rgb(25*(10-life),100,0));
+        setFill(Color.rgb(25*(10-getLife()),100,0));
     }
 
     @Override

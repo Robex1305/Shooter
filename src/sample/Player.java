@@ -18,8 +18,14 @@ public class Player extends Sprite{
 
     private boolean damageOnCooldown;
 
+    boolean mousePrimaryPressed;
+    private Point cursorPosition;
+    private Weapon weapon;
+    private Weapon defaultWeapon;
+
+
     public Player(Pane pane, double x, double y, double width, double height, String name, double speed) {
-        super(pane, x, y, width, height, name, speed);
+        super(pane, x, y, width, height, speed);
         Scene scene = this.getPane().getScene();
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
@@ -63,7 +69,29 @@ public class Player extends Sprite{
             }
         });
 
+        cursorPosition = new Point();
+        scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                click = event;
+                cursorPosition.setLocation(event.getX(), event.getY());
+            }
+        });
 
+        mousePrimaryPressed = false;
+
+        scene.setOnMouseReleased(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                click = event;
+                switch (event.getButton()){
+                    case PRIMARY:
+                        mousePrimaryPressed = false;
+                        break;
+                }
+
+            }
+        });
 
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
@@ -71,17 +99,43 @@ public class Player extends Sprite{
                 click = event;
                 switch (event.getButton()){
                     case PRIMARY:
-                        Point p = new Point();
-                        p.setLocation(click.getX(), click.getY());
-                        shoot(p);
-                        break;
+                       cursorPosition.setLocation(event.getX(), event.getY());
+                       mousePrimaryPressed = true;
+                       break;
                 }
             }
         });
 
+        this.defaultWeapon = new Weapon(pane, 2, 0.5, -1);
+        this.getPane().getChildren().remove(defaultWeapon);
+        this.weapon = this.defaultWeapon;
         damageOnCooldown = false;
     }
 
+    public Weapon getWeapon() {
+        return weapon;
+    }
+
+    public void setWeapon(Weapon weapon) {
+        this.weapon = weapon;
+    }
+
+    public void shoot(){
+        if(this.weapon.getAmmoCount() > 0) {
+            weapon.trigger();
+            shoot(cursorPosition);
+            this.weapon.setAmmoCount(this.weapon.getAmmoCount() - 1);
+        }
+        else if(this.weapon.getAmmoCount() == 0){
+            this.weapon = this.defaultWeapon;
+            weapon.trigger();
+            shoot(cursorPosition);
+        }
+        else{
+            weapon.trigger();
+            shoot(cursorPosition);
+        }
+    }
 
     public void setDamageOnCooldown(boolean damageOnCooldown) {
         this.damageOnCooldown = damageOnCooldown;
@@ -123,10 +177,10 @@ public class Player extends Sprite{
             this.setMovingXcoefficient(-1);
         }
 
-        if(this.getTranslateY() <= 60){
+        if(this.getTranslateY() <= 10){
             this.setMovingYcoefficient(1);
         }
-        else if(this.getTranslateY() >= getPane().getPrefHeight() - 10)
+        else if(this.getTranslateY() >= getPane().getPrefHeight() - getHeight())
         {
             this.setMovingYcoefficient(-1);
         }

@@ -1,9 +1,6 @@
 package sample;
 
-import javafx.event.EventHandler;
-import javafx.scene.Scene;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
+import javafx.animation.AnimationTimer;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -20,13 +17,16 @@ public class Sprite extends Rectangle {
 
     private double speed;
 
-    public Sprite(Pane pane, double x, double y, double width, double height, String name, double speed) {
+    public Sprite(Pane pane, double x, double y, double width, double height, double speed) {
         super(width, height);
         this.pane = pane;
 
         Point p = new Point();
-        if(x == 0 && y == 0){
-            p.setLocation(randomCoordinates(x,y));
+        if(x == -1 && y == -1){
+            p.setLocation(randomCoordinatesOutside());
+        }
+        else if(x == 1 && y == 1){
+            p.setLocation(randomCoordinatesInside());
         }
         else{
             p.setLocation(x,y);
@@ -39,6 +39,8 @@ public class Sprite extends Rectangle {
         this.movingYcoefficient = 0;
         this.setLife(10);
         this.pane.getChildren().add(this);
+
+
     }
 
 
@@ -48,6 +50,9 @@ public class Sprite extends Rectangle {
     }
 
     public int getLife() {
+        if(life < 0){
+            life = 0;
+        }
         return life;
     }
 
@@ -86,9 +91,18 @@ public class Sprite extends Rectangle {
         }
     }
 
-    private Point randomCoordinates(double x, double y) {
+    private Point randomCoordinatesInside(){
         double rand = Math.random();
-
+        double x = Math.random() * pane.getPrefWidth();
+        double y = Math.random() * pane.getPrefHeight();
+        Point p = new Point();
+        p.setLocation(x,y);
+        return p;
+    }
+    private Point randomCoordinatesOutside() {
+        double rand = Math.random();
+        double x = 0;
+        double y = 0;
         //Spawn top
         if(rand < 0.25){
             x = Math.random() * pane.getPrefWidth();

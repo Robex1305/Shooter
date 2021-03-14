@@ -1,5 +1,6 @@
 package sample;
 
+import com.sun.deploy.security.BadCertificateDialog;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -10,6 +11,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -22,6 +25,8 @@ public class Main extends Application {
     private Pane pane;
 
     private Player player;
+
+    private Text ammoCount;
 
     private double timer;
     @Override
@@ -45,10 +50,17 @@ public class Main extends Application {
         animationTimer.start();
 
         player = new Player(pane, 375,375,50,50, "player", 3);
+        this.ammoCount = new Text("Ammo: " + player.getWeapon().getAmmoCount() + " rounds");
+        this.ammoCount.setTranslateX(10);
+        this.ammoCount.setTranslateY(30);
+        this.ammoCount.setFont(Font.font(20));
+        pane.getChildren().add(ammoCount);
     }
 
     public void spawnEnemy(){
-        new Enemy(pane, 0,0,50,50, "player", 2, player);
+        if(player.isAlive()) {
+            new Enemy(pane, 50, 50, 2, player);
+        }
     }
 
     public boolean hasTimePassed(double second){
@@ -62,8 +74,22 @@ public class Main extends Application {
 
     private void update() {
         timer += 0.0167;
+
+        this.ammoCount.setText("Ammo: " + player.getWeapon().getAmmoCount() + " rounds");
+        if(hasTimePassed(10)){
+            Weapon rifle = new Weapon(pane, 1, 0.1, 31);
+        }
+        if(hasTimePassed(20)){
+            Weapon machineGun = new Weapon(pane, 1, 0.02, 200);
+        }
         List<Bullet> projectiles = getProjectiles();
         List<Sprite> toRemove = new ArrayList<>();
+
+        if(player.mousePrimaryPressed){
+            if(player.getWeapon().isReadyToShoot()) {
+                player.shoot();
+            }
+        }
 
         if(hasTimePassed(0.5)){
             player.setDamageOnCooldown(false);
@@ -74,30 +100,42 @@ public class Main extends Application {
         }
 
         pane.getChildren().forEach(node -> {
-            Sprite s = (Sprite) node;
-            projectiles.forEach(bullet -> {
-                if(bullet.colide(s)){
-                    toRemove.add(bullet);
-                    s.setLife(s.getLife() - 1);
-                    if(!s.isAlive()){
-                        toRemove.add(s);
+            if(node instanceof Sprite) {
+                Sprite s = (Sprite) node;
+
+                if (s instanceof Weapon) {
+                    Weapon w = (Weapon) s;
+                    if (w.colide(player)) {
+                        player.setWeapon(w);
+                        toRemove.add(w);
                     }
                 }
-            });
-            s.move();
-            if(s instanceof Enemy){
-                Enemy e = (Enemy) s;
-                if(e.colide(player)){
-                    if(hasTimePassed(0.5) && !player.isDamageOnCooldown()) {
-                        player.takeDamage(1);
-                        player.setDamageOnCooldown(true);
-                        if(!player.isAlive()){
-                            toRemove.add(player);
+                projectiles.forEach(bullet -> {
+                    if (bullet.colide(s)) {
+                        toRemove.add(bullet);
+                        s.setLife(s.getLife() - 1);
+                        if (!s.isAlive()) {
+                            toRemove.add(s);
+                        }
+                    }
+                    else if(bullet.hasExpired()){
+                        toRemove.add(bullet);
+                    }
+                });
+                s.move();
+                if (s instanceof Enemy) {
+                    Enemy e = (Enemy) s;
+                    if (e.colide(player)) {
+                        if (hasTimePassed(0.5) && !player.isDamageOnCooldown()) {
+                            player.takeDamage(1);
+                            player.setDamageOnCooldown(true);
+                            if (!player.isAlive()) {
+                                toRemove.add(player);
+                            }
                         }
                     }
                 }
             }
-
         });
 
         pane.getChildren().removeAll(toRemove);
