@@ -14,7 +14,7 @@ public class Bullet extends Sprite{
     private boolean lifespanElapsed;
 
     public Bullet(Pane pane, double x, double y, double width, double height, String name, double speed, Sprite source, Point target) {
-        super(pane, x, y, width, height, speed);
+        super(pane,"./images/default.png", x, y, width, height, speed);
         this.target = target;
         double lenghtX = target.getX() - getTranslateX();
         double lenghtY = target.getY() - getTranslateY();
@@ -45,7 +45,7 @@ public class Bullet extends Sprite{
 
     @Override
     public boolean colide(Sprite sprite) {
-        if(this.source != sprite && this != sprite) {
+        if(sprite instanceof Enemy) {
             return super.colide(sprite);
         }
         else{

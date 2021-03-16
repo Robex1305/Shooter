@@ -9,7 +9,7 @@ import javafx.scene.layout.Pane;
 import java.awt.*;
 
 public class Player extends Sprite{
-    private MouseEvent click;
+    private MouseEvent mouse;
 
     private boolean isMovingUp;
     private boolean isMovingDown;
@@ -23,9 +23,11 @@ public class Player extends Sprite{
     private Weapon weapon;
     private Weapon defaultWeapon;
 
-
-    public Player(Pane pane, double x, double y, double width, double height, String name, double speed) {
-        super(pane, x, y, width, height, speed);
+    public Player(Pane pane, double x, double y, double speed) {
+        this(pane,x,y,64,64,speed);
+    }
+    public Player(Pane pane, double x, double y, double width, double height, double speed) {
+        super(pane,"./images/player.png" ,x , y, width, height, speed);
         Scene scene = this.getPane().getScene();
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
@@ -45,6 +47,14 @@ public class Player extends Sprite{
                         isMovingRight = true;
                         break;
                 }
+            }
+        });
+
+        scene.setOnMouseMoved(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                mouse = event;
+                rotate();
             }
         });
 
@@ -73,7 +83,7 @@ public class Player extends Sprite{
         scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                click = event;
+                mouse = event;
                 cursorPosition.setLocation(event.getX(), event.getY());
             }
         });
@@ -83,7 +93,7 @@ public class Player extends Sprite{
         scene.setOnMouseReleased(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                click = event;
+                mouse = event;
                 switch (event.getButton()){
                     case PRIMARY:
                         mousePrimaryPressed = false;
@@ -96,7 +106,7 @@ public class Player extends Sprite{
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                click = event;
+                mouse = event;
                 switch (event.getButton()){
                     case PRIMARY:
                        cursorPosition.setLocation(event.getX(), event.getY());
@@ -106,8 +116,7 @@ public class Player extends Sprite{
             }
         });
 
-        this.defaultWeapon = new Weapon(pane, 2, 0.5, -1);
-        this.getPane().getChildren().remove(defaultWeapon);
+        this.defaultWeapon = new Weapon(pane, WeaponType.DEFAULT,2, 0.5, -1);
         this.weapon = this.defaultWeapon;
         damageOnCooldown = false;
     }
@@ -185,6 +194,24 @@ public class Player extends Sprite{
             this.setMovingYcoefficient(-1);
         }
 
+
+
         super.move();
+    }
+
+    @Override
+    public void rotate(){
+        if(mouse != null) {
+            double x1 = getCenterX();
+            double y1 = getCenterY();
+            double x2 = mouse.getX();
+            double y2 = mouse.getY();
+
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+            double angle = Math.atan2(dy, dx);
+            this.skin.setRotate(Math.toDegrees(angle) + 90);
+
+        }
     }
 }

@@ -1,6 +1,8 @@
 package sample;
 
 import javafx.animation.AnimationTimer;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -12,14 +14,24 @@ public class Sprite extends Rectangle {
 
     private double movingXcoefficient;
     private double movingYcoefficient;
-
+    protected ImageView skin;
     private int life;
 
     private double speed;
 
-    public Sprite(Pane pane, double x, double y, double width, double height, double speed) {
+    public Sprite(Pane pane, double x, double y, double speed) {
+        this(pane,"./images/default.png", x,y,64,64,speed);
+    }
+    public Sprite(Pane pane, String urlImage, double x, double y, double width, double height, double speed) {
         super(width, height);
         this.pane = pane;
+        Image image = new Image(urlImage,getWidth(), getHeight(), false, false);
+        ImageView imageView = new ImageView();
+        imageView.setImage(image);
+        imageView.setFitWidth(getWidth()*2);
+        imageView.setFitHeight(getHeight()*2);
+        this.setOpacity(0);
+
 
         Point p = new Point();
         if(x == -1 && y == -1){
@@ -39,11 +51,34 @@ public class Sprite extends Rectangle {
         this.movingYcoefficient = 0;
         this.setLife(10);
         this.pane.getChildren().add(this);
-
+        pane.getChildren().add(imageView);
+        this.skin = imageView;
 
     }
 
+    public double getCenterX(){
+        return this.getTranslateX() - (getWidth()/2);
+    }
 
+    public double getCenterY(){
+        return this.getTranslateY() - (getHeight()/2);
+    }
+
+    public double getCenterImageX(){
+        return this.getSkin().getTranslateX() - (getSkin().getFitWidth()/2);
+    }
+
+    public double getCenterImageY(){
+        return this.getSkin().getTranslateY() - (getSkin().getFitHeight()/2);
+    }
+
+    public ImageView getSkin() {
+        return skin;
+    }
+
+    public void setSkin(ImageView skin) {
+        this.skin = skin;
+    }
 
     public boolean isAlive(){
         return getLife() > 0;
@@ -88,7 +123,12 @@ public class Sprite extends Rectangle {
         if(isAlive()) {
             this.setTranslateX(getTranslateX() + getMovingXcoefficient() * speed);
             this.setTranslateY(getTranslateY() + getMovingYcoefficient() * speed);
+            this.skin.setTranslateX(getCenterX());
+            this.skin.setTranslateY(getCenterY());
+
+            rotate();
         }
+
     }
 
     private Point randomCoordinatesInside(){
@@ -130,7 +170,7 @@ public class Sprite extends Rectangle {
 
     public void shoot(Point p){
         if(isAlive()) {
-            new Bullet(this.pane, this.getTranslateX() + (getWidth() / 2), this.getTranslateY() + (getHeight() / 2), 5, 5, "bullet", 6, this, p);
+            new Bullet(this.pane, this.getTranslateX() + (getWidth() / 2), this.getTranslateY() + (getHeight() / 2), 5, 5, "bullet", 10, this, p);
         }
     }
 
@@ -141,5 +181,9 @@ public class Sprite extends Rectangle {
         else{
             return false;
         }
+    }
+
+    public void rotate(){
+
     }
 }

@@ -5,6 +5,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -28,7 +29,10 @@ public class Main extends Application {
 
     private Text ammoCount;
 
+    private Text life;
     private double timer;
+    private List<Sprite> toRemove;
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         pane = new Pane();
@@ -39,7 +43,7 @@ public class Main extends Application {
         primaryStage.setTitle("Shooter");
         primaryStage.setScene(scene);
         primaryStage.show();
-
+        toRemove = new ArrayList<>();
         AnimationTimer animationTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -49,17 +53,50 @@ public class Main extends Application {
 
         animationTimer.start();
 
-        player = new Player(pane, 375,375,50,50, "player", 3);
-        this.ammoCount = new Text("Ammo: " + player.getWeapon().getAmmoCount() + " rounds");
+        player = new Player(pane, 375,375,3);
+        toRemove.add(player.getWeapon());
+
+        this.ammoCount = new Text(ammoCount(player));
         this.ammoCount.setTranslateX(10);
         this.ammoCount.setTranslateY(30);
         this.ammoCount.setFont(Font.font(20));
         pane.getChildren().add(ammoCount);
+
+
+        this.life = new Text(healthBar(player));
+        this.life.setTranslateX(600);
+        this.life.setTranslateY(30);
+        this.life.setFont(Font.font(20));
+        pane.getChildren().add(life);
+    }
+
+    public String ammoCount(Player player){
+        String ammo = "Ammo: ";
+        if(player.getWeapon().getAmmoCount() == -1){
+            return ammo + "∞";
+        }
+        else{
+            for(int i = 0; i < player.getWeapon().getAmmoCount(); i++){
+                if(i > 0 && i%60 == 0){
+                    ammo += "\n";
+                }
+                ammo += "|";
+            }
+        }
+        return ammo;
+    }
+    public String healthBar(Player player){
+        String bar = "HP: ";
+        for(int i = 0; i < player.getLife(); i++){
+            bar += "♥";
+        }
+
+        return bar;
     }
 
     public void spawnEnemy(){
         if(player.isAlive()) {
-            new Enemy(pane, 50, 50, 2, player);
+            new Enemy(pane, 2, player);
         }
     }
 
@@ -75,21 +112,24 @@ public class Main extends Application {
     private void update() {
         timer += 0.0167;
 
-        this.ammoCount.setText("Ammo: " + player.getWeapon().getAmmoCount() + " rounds");
-        if(hasTimePassed(10)){
-            Weapon rifle = new Weapon(pane, 1, 0.1, 31);
-        }
         if(hasTimePassed(20)){
-            Weapon machineGun = new Weapon(pane, 1, 0.02, 200);
+            Weapon machineGun = new Weapon(pane, WeaponType.MACHINEGUN, 1, 0.02, 200);
         }
+        else if(hasTimePassed(10)){
+            Weapon rifle = new Weapon(pane,WeaponType.ASSAULT_RIFLE,  1, 0.1, 31);
+        }
+
+
         List<Bullet> projectiles = getProjectiles();
-        List<Sprite> toRemove = new ArrayList<>();
 
         if(player.mousePrimaryPressed){
             if(player.getWeapon().isReadyToShoot()) {
                 player.shoot();
             }
         }
+
+        this.ammoCount.setText(ammoCount(player));
+        this.life.setText(healthBar(player));
 
         if(hasTimePassed(0.5)){
             player.setDamageOnCooldown(false);
@@ -137,10 +177,16 @@ public class Main extends Application {
                 }
             }
         });
-
-        pane.getChildren().removeAll(toRemove);
+        deleteSprite(toRemove);
+        toRemove.clear();
     }
 
+    public void deleteSprite(List<Sprite> toRemove){
+        for(Sprite s : toRemove){
+            pane.getChildren().remove(s.getSkin());
+            pane.getChildren().remove(s);
+        }
+    }
 
 
     public static void main(String[] args) {
