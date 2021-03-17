@@ -4,7 +4,7 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.layout.Pane;
 
 enum WeaponType{
-    ASSAULT_RIFLE("./images/rifle.png"),
+    ASSAULT_RIFLE("./images/assaultrifle.png"),
     MACHINEGUN("./images/machinegun.png"),
     DEFAULT("./images/default.png");
 
@@ -27,7 +27,7 @@ public class Weapon extends Sprite{
     private WeaponType type;
 
     public Weapon(Pane pane, WeaponType type, int damages, double rateOfFire, int ammoCount) {
-        super(pane,type.getValue() ,1, 1, 64, 64, 0);
+        super(pane,type.getValue() ,1, 1, 64, 32, 0);
 
         this.damages = damages;
         this.rateOfFire = rateOfFire;

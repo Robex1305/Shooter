@@ -14,7 +14,7 @@ public class Enemy extends Sprite{
     }
 
     public Enemy(Pane pane, double width, double height, double speed, Sprite target) {
-        super(pane, "./images/zombie.png", -1, -1, width, height, speed);
+        super(pane, "./images/zombie.gif", -1, -1, width, height, speed);
         this.target = target;
     }
 
@@ -35,30 +35,20 @@ public class Enemy extends Sprite{
             this.setMovingXcoefficient((lenghtX / lenghtXY));
             this.setMovingYcoefficient((lenghtY / lenghtXY));
             super.move();
-            rotate();
         }
-    }
-
-    public void shoot(Sprite s){
-        Point p = new Point();
-        p.setLocation(s.getTranslateX(), s.getTranslateY());
-        shoot(p);
+        rotate();
     }
 
     public void attack(Player player) {
         player.takeDamage(1);
     }
 
-    public void rotate(){
-        double x1 = getCenterX();
-        double y1 = getCenterY();
-        double x2 = target.getCenterX();
-        double y2 = target.getCenterY();
+    public void rotate() {
+        Point origin = new Point();
+        Point target = new Point();
 
-        double dx = x2 - x1;
-        double dy = y2 - y1;
-        double angle = Math.atan2(dy, dx);
-        this.skin.setRotate(Math.toDegrees(angle) + 90);
-
+        origin.setLocation(getCenterX(), getCenterY());
+        target.setLocation(this.target.getCenterX(), this.target.getCenterY());
+        super.rotate(origin, target);
     }
 }

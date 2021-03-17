@@ -113,7 +113,7 @@ public class Main extends Application {
         timer += 0.0167;
 
         if(hasTimePassed(20)){
-            Weapon machineGun = new Weapon(pane, WeaponType.MACHINEGUN, 1, 0.02, 200);
+            Weapon machineGun = new Weapon(pane, WeaponType.MACHINEGUN, 1, 0.07, 200);
         }
         else if(hasTimePassed(10)){
             Weapon rifle = new Weapon(pane,WeaponType.ASSAULT_RIFLE,  1, 0.1, 31);

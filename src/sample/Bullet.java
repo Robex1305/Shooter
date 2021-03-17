@@ -10,11 +10,11 @@ import java.awt.*;
 
 public class Bullet extends Sprite{
     private Point target;
-    private Sprite source;
+    private Point source;
     private boolean lifespanElapsed;
 
-    public Bullet(Pane pane, double x, double y, double width, double height, String name, double speed, Sprite source, Point target) {
-        super(pane,"./images/default.png", x, y, width, height, speed);
+    public Bullet(Pane pane, Point source, Point target) {
+        super(pane,"./images/default.png", source.getX(), source.getY(), 15, 4, 15);
         this.target = target;
         double lenghtX = target.getX() - getTranslateX();
         double lenghtY = target.getY() - getTranslateY();
@@ -23,6 +23,7 @@ public class Bullet extends Sprite{
         this.setMovingYcoefficient((lenghtY / lenghtXY));
         this.source = source;
         this.setFill(Color.DARKRED);
+        this.rotate(source, target);
         lifespanElapsed = false;
 
         new Thread() {

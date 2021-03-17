@@ -1,5 +1,6 @@
 package sample;
 
+import com.sun.javafx.geom.Vec2d;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
@@ -24,7 +25,7 @@ public class Player extends Sprite{
     private Weapon defaultWeapon;
 
     public Player(Pane pane, double x, double y, double speed) {
-        this(pane,x,y,64,64,speed);
+        this(pane,x,y,64,32,speed);
     }
     public Player(Pane pane, double x, double y, double width, double height, double speed) {
         super(pane,"./images/player.png" ,x , y, width, height, speed);
@@ -116,7 +117,7 @@ public class Player extends Sprite{
             }
         });
 
-        this.defaultWeapon = new Weapon(pane, WeaponType.DEFAULT,2, 0.5, -1);
+        this.defaultWeapon = new Weapon(pane, WeaponType.DEFAULT,2, 0.3, -1);
         this.weapon = this.defaultWeapon;
         damageOnCooldown = false;
     }
@@ -145,6 +146,14 @@ public class Player extends Sprite{
             shoot(cursorPosition);
         }
     }
+
+
+    public void shoot(Point p){
+        if(isAlive()) {
+            new Bullet(this.getPane(), this.getShootingOrigin(), p);
+        }
+    }
+
 
     public void setDamageOnCooldown(boolean damageOnCooldown) {
         this.damageOnCooldown = damageOnCooldown;
@@ -194,24 +203,39 @@ public class Player extends Sprite{
             this.setMovingYcoefficient(-1);
         }
 
-
-
         super.move();
+        rotate();
     }
 
-    @Override
+    public Point getMousePosition(){
+        if(mouse != null){
+            Point p = new Point();
+            p.setLocation(mouse.getX(), mouse.getY());
+            return p;
+        }
+        else{
+            return new Point(0,0);
+        }
+    }
+
+    public Point getShootingOrigin(){
+        Vec2d aimDir = getAimDirection(getCenter(), getMousePosition());
+        double vecX = aimDir.x;
+        double vecY = aimDir.y;
+
+        Point p = new Point();
+        p.setLocation(getCenterX() + vecX*(getWidth()/2), getCenterY() + vecY*(getHeight()/2));
+        return p;
+    }
+
     public void rotate(){
         if(mouse != null) {
-            double x1 = getCenterX();
-            double y1 = getCenterY();
-            double x2 = mouse.getX();
-            double y2 = mouse.getY();
+            Point origin = new Point();
+            Point target = new Point();
 
-            double dx = x2 - x1;
-            double dy = y2 - y1;
-            double angle = Math.atan2(dy, dx);
-            this.skin.setRotate(Math.toDegrees(angle) + 90);
-
+            origin.setLocation(getCenterX(), getCenterY());
+            target.setLocation(mouse.getX(), mouse.getY());
+            super.rotate(origin, target);
         }
     }
 }

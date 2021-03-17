@@ -1,13 +1,19 @@
 package sample;
 
+import com.sun.javafx.geom.Vec2d;
 import javafx.animation.AnimationTimer;
+import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.awt.*;
+import java.util.Vector;
 
 public class Sprite extends Rectangle {
     private Pane pane;
@@ -25,11 +31,12 @@ public class Sprite extends Rectangle {
     public Sprite(Pane pane, String urlImage, double x, double y, double width, double height, double speed) {
         super(width, height);
         this.pane = pane;
-        Image image = new Image(urlImage,getWidth(), getHeight(), false, false);
+        Image image = new Image(urlImage,getWidth(), getHeight(), true, false);
         ImageView imageView = new ImageView();
         imageView.setImage(image);
-        imageView.setFitWidth(getWidth()*2);
-        imageView.setFitHeight(getHeight()*2);
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
+
         this.setOpacity(0);
 
 
@@ -53,23 +60,25 @@ public class Sprite extends Rectangle {
         this.pane.getChildren().add(this);
         pane.getChildren().add(imageView);
         this.skin = imageView;
+    }
 
+    public void updateImagePosition(){
+        this.skin.setTranslateX(this.getTranslateX());
+        this.skin.setTranslateY(this.getTranslateY());
+    }
+
+    public Point getCenter(){
+        Point p = new Point();
+        p.setLocation(getCenterX(), getCenterY());
+        return p;
     }
 
     public double getCenterX(){
-        return this.getTranslateX() - (getWidth()/2);
+        return this.getTranslateX() + (getWidth()/2);
     }
 
     public double getCenterY(){
-        return this.getTranslateY() - (getHeight()/2);
-    }
-
-    public double getCenterImageX(){
-        return this.getSkin().getTranslateX() - (getSkin().getFitWidth()/2);
-    }
-
-    public double getCenterImageY(){
-        return this.getSkin().getTranslateY() - (getSkin().getFitHeight()/2);
+        return this.getTranslateY() + (getHeight()/2);
     }
 
     public ImageView getSkin() {
@@ -123,10 +132,7 @@ public class Sprite extends Rectangle {
         if(isAlive()) {
             this.setTranslateX(getTranslateX() + getMovingXcoefficient() * speed);
             this.setTranslateY(getTranslateY() + getMovingYcoefficient() * speed);
-            this.skin.setTranslateX(getCenterX());
-            this.skin.setTranslateY(getCenterY());
-
-            rotate();
+            updateImagePosition();
         }
 
     }
@@ -168,12 +174,6 @@ public class Sprite extends Rectangle {
         return p;
     }
 
-    public void shoot(Point p){
-        if(isAlive()) {
-            new Bullet(this.pane, this.getTranslateX() + (getWidth() / 2), this.getTranslateY() + (getHeight() / 2), 5, 5, "bullet", 10, this, p);
-        }
-    }
-
     public boolean colide(Sprite sprite){
         if(this.getBoundsInParent().intersects(sprite.getBoundsInParent())){
             return true;
@@ -183,7 +183,26 @@ public class Sprite extends Rectangle {
         }
     }
 
-    public void rotate(){
+    public Vec2d getAimDirection(Point origin, Point target){
+        double x1 = origin.getX();
+        double y1 = origin.getY();
+        double x2 = target.getX();
+        double y2 = target.getY();
 
+        double dist = Vec2d.distance(x1,y1,x2,y2);
+        double dx = (x2 - x1)/dist;
+        double dy = (y2 - y1)/dist;
+
+        Vec2d vector = new Vec2d();
+        vector.set(dx, dy);
+        return vector;
+
+    }
+
+    public void rotate(Point origin, Point target){
+        Vec2d aimDir = getAimDirection(origin, target);
+        double rad = Math.atan2(aimDir.y, aimDir.x);
+        this.setRotate(Math.toDegrees(rad) + 90);
+        this.skin.setRotate(Math.toDegrees(rad));
     }
 }
