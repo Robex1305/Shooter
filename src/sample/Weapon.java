@@ -2,11 +2,12 @@ package sample;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.AudioClip;
 
 enum WeaponType{
-    ASSAULT_RIFLE("./images/assaultrifle.png"),
-    MACHINEGUN("./images/machinegun.png"),
-    DEFAULT("./images/default.png");
+    ASSAULT_RIFLE("/images/assaultrifle.png"),
+    MACHINEGUN("/images/machinegun.png"),
+    DEFAULT("/images/default.png");
 
     String value;
 
@@ -23,6 +24,7 @@ public class Weapon extends Sprite{
     private int damages;
     private double rateOfFire;
     private int ammoCount;
+    private int ammoCountMax;
     private double timer;
     private WeaponType type;
 
@@ -32,6 +34,7 @@ public class Weapon extends Sprite{
         this.damages = damages;
         this.rateOfFire = rateOfFire;
         this.ammoCount = ammoCount;
+        this.ammoCountMax = ammoCount;
         this.type = type;
         AnimationTimer animationTimer = new AnimationTimer() {
             @Override
@@ -47,6 +50,10 @@ public class Weapon extends Sprite{
         animationTimer.start();
     }
 
+    public int getAmmoCountMax() {
+        return ammoCountMax;
+    }
+
     public WeaponType getType() {
         return type;
     }
@@ -56,7 +63,18 @@ public class Weapon extends Sprite{
     }
 
     public void trigger(){
+
+        String fire = "";
         this.timer = getRateOfFire();
+        if(this.getType().equals(WeaponType.DEFAULT))
+            fire = "/sound/pistol.mp3";
+        if(this.getType().equals(WeaponType.ASSAULT_RIFLE))
+            fire = "/sound/rifle.mp3";
+        if(this.getType().equals(WeaponType.MACHINEGUN))
+            fire = "/sound/m249.mp3";
+
+
+        new AudioClip(this.getClass().getResource(fire).toExternalForm()).play();
     }
 
     public boolean isReadyToShoot(){

@@ -14,7 +14,7 @@ public class Bullet extends Sprite{
     private boolean lifespanElapsed;
 
     public Bullet(Pane pane, Point source, Point target) {
-        super(pane,"./images/default.png", source.getX(), source.getY(), 15, 4, 15);
+        super(pane,"/images/default.png", source.getX(), source.getY(), 15, 4, 15);
         this.target = target;
         double lenghtX = target.getX() - getTranslateX();
         double lenghtY = target.getY() - getTranslateY();

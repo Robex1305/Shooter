@@ -14,7 +14,7 @@ public class Enemy extends Sprite{
     }
 
     public Enemy(Pane pane, double width, double height, double speed, Sprite target) {
-        super(pane, "./images/zombie.gif", -1, -1, width, height, speed);
+        super(pane, "/images/zombie.gif", -1, -1, width, height, speed);
         this.target = target;
     }
 

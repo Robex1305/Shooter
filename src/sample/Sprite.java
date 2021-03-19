@@ -26,12 +26,13 @@ public class Sprite extends Rectangle {
     private double speed;
 
     public Sprite(Pane pane, double x, double y, double speed) {
-        this(pane,"./images/default.png", x,y,64,64,speed);
+        this(pane,"/images/default.png", x,y,128,128,speed);
     }
     public Sprite(Pane pane, String urlImage, double x, double y, double width, double height, double speed) {
         super(width, height);
         this.pane = pane;
-        Image image = new Image(urlImage,getWidth(), getHeight(), true, false);
+
+        Image image = new Image(this.getClass().getResourceAsStream(urlImage),getWidth(), getHeight(), true, false);
         ImageView imageView = new ImageView();
         imageView.setImage(image);
         imageView.setFitWidth(width);
@@ -139,8 +140,8 @@ public class Sprite extends Rectangle {
 
     private Point randomCoordinatesInside(){
         double rand = Math.random();
-        double x = Math.random() * pane.getPrefWidth();
-        double y = Math.random() * pane.getPrefHeight();
+        double x = Math.random() * 700 + 50;
+        double y = Math.random() * 700 + 50;
         Point p = new Point();
         p.setLocation(x,y);
         return p;

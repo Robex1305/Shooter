@@ -28,7 +28,7 @@ public class Player extends Sprite{
         this(pane,x,y,64,32,speed);
     }
     public Player(Pane pane, double x, double y, double width, double height, double speed) {
-        super(pane,"./images/player.png" ,x , y, width, height, speed);
+        super(pane,"/images/player.png" ,x , y, width, height, speed);
         Scene scene = this.getPane().getScene();
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
@@ -117,7 +117,7 @@ public class Player extends Sprite{
             }
         });
 
-        this.defaultWeapon = new Weapon(pane, WeaponType.DEFAULT,2, 0.3, -1);
+        this.defaultWeapon = new Weapon(pane, WeaponType.DEFAULT,3, 0.5, -1);
         this.weapon = this.defaultWeapon;
         damageOnCooldown = false;
     }
